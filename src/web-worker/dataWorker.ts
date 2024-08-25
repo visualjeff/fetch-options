@@ -1,11 +1,11 @@
-// Can't import other dependencies into a web worker, so I wasn't able to use the existing fetcher utility.
+// Can import other dependencies into a web worker with the module flag.
+import dataFetcher from "../utils/fetcher"; 
 
 self.onmessage = async (event) => {
     const { url } = event.data;
 
     try {
-        const response = await fetch(url, {});
-        const data = await response.json();
+        const data = await dataFetcher(url, {});
         self.postMessage({ data });
     } catch (error: any ) {
         self.postMessage({ error: error.message });
