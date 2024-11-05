@@ -1,0 +1,24 @@
+// Example Saga
+import { call, CallEffect, put, PutEffect, TakeEffect } from "./index"
+import fetcher from "../utils/fetcher";
+
+const urls = [
+    'https://jsonplaceholder.typicode.com/todos/1',
+    'https://jsonplaceholder.typicode.com/todos/2',
+    'https://jsonplaceholder.typicode.com/todos/3',
+    'https://jsonplaceholder.typicode.com/todos/4',
+    'https://jsonplaceholder.typicode.com/todos/5'
+]
+// Mock API service with typed result
+const fetchTodo = async (id: number): Promise<unknown> => {
+    return await fetcher(urls[id], {})
+};
+
+export default function* mySaga(): Generator<CallEffect | PutEffect | TakeEffect, unknown, unknown> {
+    console.log('Saga started');
+    // Call the service (API call) and await the result
+    const user: unknown = yield call(fetchTodo, 0);
+
+    // Dispatch an action (for a react reducer) with the fetched user data
+    yield put({ type: 'FETCH_USER_SUCCESS', payload: user });
+}

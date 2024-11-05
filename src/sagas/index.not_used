@@ -1,0 +1,82 @@
+/*
+Saga Explanation:
+- Effect Creators: Functions like `call`, `put`, and `take` create effects that represent actions 
+  or operations to be performed.
+- Saga Runner: The `runSaga` function handles the yielded effects. It interprets each effect and performs 
+  the corresponding action (e.g., calling a function, dispatching an action, or waiting for an action).
+*/
+
+// Effect Types
+export const CALL = 'CALL'; // call: Wait for the promise to finish. The argument should be a function that returns a promise.
+export const PUT = 'PUT'; // put: Dispatch an action.
+export const TAKE = 'TAKE'; // take: instructs the middleware to wait for a specified action, and take as argument a string that is not a function of the action, but an action.type.
+// What's Effects are missing?   fork and select
+
+
+// Effect Types in TypeScript
+export interface CallEffect {
+  type: typeof CALL;
+  fn: (...args: any[]) => Promise<any>;
+  args: any[];
+}
+
+export interface PutEffect {
+  type: typeof PUT;
+  action: { type: string; payload?: unknown; error?: unknown };
+}
+
+export interface TakeEffect {
+  type: typeof TAKE;
+  actionType: string;
+}
+
+// Effect Creators
+export function call(fn: (...args: any[]) => Promise<any>, ...args: any[]): CallEffect {
+  return { type: CALL, fn, args };
+}
+
+export function put(action: { type: string; payload?: unknown; error?: unknown }): PutEffect {
+  return { type: PUT, action };
+}
+
+export function take(actionType: string): TakeEffect {
+  return { type: TAKE, actionType };
+}
+
+// Saga Runner
+export default function runSaga(saga: () => Generator<CallEffect | PutEffect | TakeEffect, unknown, unknown>): void {
+  const iterator = saga();
+
+  function step(nextValue?: any) {
+    const result = iterator.next(nextValue);
+
+    if (!result.done) {
+      const effect = result.value;
+
+      switch (effect.type) {
+        case CALL:
+          effect.fn(...effect.args)
+            .then(step)
+            .catch((error: unknown) => iterator.throw(error)); // Error handling
+          break;
+        case PUT:
+          // Handle dispatched action (e.g., log the action)
+          console.log("Dispatching action:", effect.action);
+          step();
+          break;
+        case TAKE:
+          console.log(`Waiting for action of type ${effect.actionType}`);
+          step({ type: effect.actionType });
+          break;
+        default:
+          step();
+          break;
+      } 
+    } else {
+      // Handle return value when saga completes
+      console.log('Saga completed with return value:', result.value);
+    }
+  }
+
+  step();
+}

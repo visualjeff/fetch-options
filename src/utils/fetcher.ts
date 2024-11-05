@@ -11,7 +11,7 @@ export class HTTPError extends Error {
     }
 }
 
-const fetcher = async (url: RequestInfo | URL, init: RequestInit) =>
+const fetcher = async (url: RequestInfo | URL, init: RequestInit): Promise<any> =>
     fetch(url, init)
         .then(response => {
             if (!response.ok) {

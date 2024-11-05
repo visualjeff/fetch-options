@@ -2,9 +2,9 @@
 import Contentstack, { Config } from 'contentstack';
 
 const stackConfig = {
-    api_key: '',
+    api_key: 'bltc822c5b479075ef1',
     branch: 'main',
-    delivery_token: '',
+    delivery_token: 'cs91f1489e8bed6f3d784d1a94',
     environment: 'development',
     fetchOptions: {
         retryLimit: 0
